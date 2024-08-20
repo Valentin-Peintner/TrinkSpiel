@@ -1,98 +1,272 @@
+package playerScorePackage;
+
+import Player.PlayerScore;
+import GameUtils.GameUtils;
+
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class game {
 
-    static Integer myNumber= ThreadLocalRandom.current().nextInt(0, 50 + 1);
+    static List<PlayerScore> playersScore = new ArrayList<>();
+    static int currentRound = 0;
+    static int maxRounds = 10;
+    static int currentPlayerIndex = 0;
+    static int totalPlayers;
+    static Integer myNumber;
     static Integer count = 0;
-    static JLabel text = new JLabel("Gebe eine Zahl zwischen 0 und 50 ein!");
-    static JLabel textTwo = new JLabel("Bei jedem falschen Versuch musst du 1x trinken!");
-    static JLabel tries = new JLabel("Deine Versuche: " + count);
-    static JTextField textField = new JTextField();
+    static JLabel text = new JLabel();
+    static JLabel tries = new JLabel("Deine Versuche: " + count, SwingConstants.CENTER);
+    static JLabel currentPlayerLabel = new JLabel("Aktueller Spieler: ", SwingConstants.CENTER);
 
     public static void main(String[] args) {
-        openUI();
+        openStartPage();
     }
 
-    public static void openUI() {
-
-        JFrame.setDefaultLookAndFeelDecorated(true);
-        JFrame frame = new JFrame("Rate die Zahl! Oder trink einen!");
-        frame.setSize(400, 300);
-        frame.setLocation(800, 400);
+    public static void openStartPage() {
+        JFrame frame = new JFrame("Wer falsch liegt, trinkt!");
+        frame.setSize(800, 800);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
 
-        text.setBounds(80, 60, 400, 30);
-        textTwo.setBounds(50, 80, 400, 30);
-        textField.setBounds(100, 120, 200, 30);
-        tries.setBounds(270, 10, 200,30);
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
 
-        JButton button = new JButton("Raten!");
-        button.setBounds(100, 150, 100, 30);
-        frame.getRootPane().setDefaultButton(button);
+        JLabel welcomeLabel = new JLabel("Willkommen beim Zahlenraten – Wer falsch liegt, trinkt!", SwingConstants.CENTER);
+        welcomeLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        centerPanel.add(welcomeLabel, gbc);
 
-        button.addActionListener(new ActionListener() {
+        JLabel playerCountLabel = new JLabel("Anzahl der Spieler:");
+        gbc.gridy = 1;
+        gbc.gridwidth = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        centerPanel.add(playerCountLabel, gbc);
+
+        JSpinner playerSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 4, 1));
+        playerSpinner.setPreferredSize(new Dimension(100, 30)); // Größe des JSpinners anpassen
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.EAST;
+        centerPanel.add(playerSpinner, gbc);
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayout(1, 2, 10, 0)); // Layout: 1 Reihe, 2 Spalten, 10px Abstand
+
+        JButton startButton = new JButton("Start");
+        startButton.setFont(new Font("Arial", Font.PLAIN, 16));
+        buttonPanel.add(startButton);
+
+        JButton scoreButton = new JButton("Score-Liste");
+        scoreButton.setFont(new Font("Arial", Font.PLAIN, 16));
+        buttonPanel.add(scoreButton);
+
+        gbc.gridy = 2;
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        centerPanel.add(buttonPanel, gbc);
+
+        // Event-Listener für Start-Button
+        startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    String textFromTextField = textField.getText();
-                    Integer number = Integer.parseInt(textFromTextField);
-                    guess(number);
-                } catch (Exception error) {
-                    text.setText("Bitte gebe eine Zahl ein!");
-                    textTwo.setText("");
-                }
+                int numberOfPlayers = (Integer) playerSpinner.getValue();
+                frame.dispose();
+                openGamePage(numberOfPlayers);
             }
         });
 
-        JButton resetButton = new JButton("Reset");
-        resetButton.setBounds(200, 150, 100, 30);
-
-        // Reset Game by Button
-        resetButton.addActionListener(new ActionListener() {
+        // Event-Listener für Score-Button
+        scoreButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                count = 0;
-
-                myNumber = ThreadLocalRandom.current().nextInt(0, 50 + 1);
-
-                text.setText("Gebe eine Zahl zwischen 0 und 100 ein!");
-                textTwo.setText("Bei jedem falschen Versuch musst du 1x saufen!");
-                tries.setText("Deine Versuche: " + count);
-                textField.setText("");
-
-                textField.requestFocus();
+                GameUtils.openScorePage(frame, playersScore);
             }
         });
 
-        frame.add(button);
-        frame.add(resetButton);
-        frame.add(tries);
-        frame.add(text);
-        frame.add(textTwo);
-        frame.add(textField);
-        frame.setLayout(null);
+        frame.add(centerPanel, BorderLayout.CENTER);
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 
-    public static void guess(Integer number) {
 
-        if(number.equals(myNumber)) {
-            text.setText("Richtig geraten! mit " + count + " Versuchen!");
-        } else {
-            count++;
-            tries.setText("Deine Versuche: " + count);
-            if(number < myNumber) {
-                text.setText("Falsch geraten! eine Zahl ist zu klein!");
-            } else {
-                text.setText("Falsch geraten! eine Zahl ist zu groß!");
-            }
-            textField.setText("");
-            textTwo.setText("");
+    public static void openGamePage(int numberOfPlayers) {
+        JFrame frame = new JFrame("Rate die Zahl richtig oder trink einen Schluck!");
+        frame.setSize(800, 800);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayout(3, 3));
+
+        JButton[] buttons = new JButton[9];
+        for (int i = 0; i < 9; i++) {
+            final int buttonNumber = i + 1;
+            buttons[i] = new JButton(String.valueOf(buttonNumber));
+            buttons[i].setFont(new Font("Arial", Font.PLAIN, 36));
+            buttons[i].setBackground(Color.white);
+            buttons[i].setOpaque(true);
+            buttons[i].setBorder(BorderFactory.createEmptyBorder());
+            buttons[i].setBorderPainted(false);
+            buttons[i].setFocusPainted(false);
+            buttons[i].addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    guess(buttonNumber, buttons, text, tries, frame);
+                }
+            });
+
+            buttonPanel.add(buttons[i]);
         }
 
+        JButton resetButton = new JButton("Reset");
+        resetButton.setFont(new Font("Arial", Font.PLAIN, 24));
+        resetButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                GameUtils.resetGame(text, tries);
+                frame.dispose();
+                openStartPage();
+            }
+        });
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new BorderLayout());
+        bottomPanel.add(resetButton, BorderLayout.SOUTH);
+
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BorderLayout());
+        topPanel.add(currentPlayerLabel, BorderLayout.CENTER);
+
+        frame.add(text, BorderLayout.NORTH);
+        frame.add(buttonPanel, BorderLayout.CENTER);
+        frame.add(tries, BorderLayout.SOUTH);
+        frame.add(topPanel, BorderLayout.NORTH);
+        frame.add(bottomPanel, BorderLayout.PAGE_END);
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+
+        initializePlayers(numberOfPlayers);
+        updateCurrentPlayerLabel();
+    }
+
+    public static void initializePlayers(int numberOfPlayers) {
+        playersScore.clear();
+        totalPlayers = numberOfPlayers;
+
+        for (int i = 1; i <= numberOfPlayers; i++) {
+            String playerName = JOptionPane.showInputDialog("Gib den Namen für Spieler " + i + " ein:");
+            if (playerName == null || playerName.trim().isEmpty()) {
+                playerName = "Spieler " + i;
+            }
+            playersScore.add(new PlayerScore(playerName));
+        }
+
+        currentPlayerIndex = 0;
+        myNumber = ThreadLocalRandom.current().nextInt(1, 10);
+    }
+
+    public static void guess(int number, JButton[] buttons, JLabel text, JLabel tries, JFrame frame) {
+        if (buttons == null) {
+            System.err.println("Buttons array is null.");
+            return;
+        }
+
+        PlayerScore currentPlayer = playersScore.get(currentPlayerIndex);
+
+        for (JButton button : buttons) {
+            button.setBackground(Color.WHITE);
+        }
+
+        JButton clickedButton = null;
+        for (JButton button : buttons) {
+            if (Integer.parseInt(button.getText()) == number) {
+                clickedButton = button;
+                break;
+            }
+        }
+
+        if (clickedButton != null) {
+            if (number == myNumber) {
+                text.setText("Richtig geraten von " + currentPlayer.getName() + "! Mit " + count + " Versuchen!");
+                clickedButton.setBackground(Color.GREEN); // Button grün
+                handleCorrectGuess(frame);
+            } else {
+                count++;
+                tries.setText("Deine Versuche: " + count);
+                if (Math.abs(number - myNumber) <= 2) {
+                    clickedButton.setBackground(Color.YELLOW); // Button gelb
+                } else {
+                    clickedButton.setBackground(Color.RED); // Button rot
+                }
+                switchPlayer();
+            }
+        }
+    }
+
+    private static void handleCorrectGuess(JFrame frame) {
+        PlayerScore currentPlayer = playersScore.get(currentPlayerIndex);
+        currentPlayer.addPoints(1);
+        GameUtils.openScorePage(frame, playersScore);
+        resetRound();
+    }
+
+    private static void resetRound() {
+        currentRound++;
+        if (currentRound >= maxRounds) {
+            announceWinner();
+        } else {
+            currentPlayerIndex = 0;
+            count = 0;
+            tries.setText("Deine Versuche: " + count);
+            myNumber = ThreadLocalRandom.current().nextInt(1, 9 + 1);
+            updateCurrentPlayerLabel();
+        }
+    }
+
+    private static void announceWinner() {
+        if (playersScore.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Keine Spieler vorhanden. Es kann kein Gewinner ermittelt werden.");
+            return;
+        }
+
+        PlayerScore winner = playersScore.stream()
+                .max((p1, p2) -> Integer.compare(p1.getPoints(), p2.getPoints()))
+                .orElse(null);
+
+        if (winner != null) {
+            JOptionPane.showMessageDialog(null, "Herzlichen Glückwunsch " + winner.getName() + ", du hast gewonnen!");
+
+            // Zeige die Punkte aller Spieler an
+            StringBuilder scoreList = new StringBuilder("Endstand:\n");
+            for (PlayerScore player : playersScore) {
+                scoreList.append(player.getName()).append(": ").append(player.getPoints()).append(" Punkte\n");
+            }
+            JOptionPane.showMessageDialog(null, scoreList.toString(), "Score-Liste", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(null, "Es gab einen Fehler beim Ermitteln des Gewinners.");
+        }
+    }
+
+
+    private static void updateCurrentPlayerLabel() {
+        PlayerScore currentPlayer = playersScore.get(currentPlayerIndex);
+        currentPlayerLabel.setText("Aktueller Spieler: " + currentPlayer.getName());
+    }
+
+
+    private static void switchPlayer() {
+        currentPlayerIndex = (currentPlayerIndex + 1) % totalPlayers;
+        updateCurrentPlayerLabel();
     }
 }

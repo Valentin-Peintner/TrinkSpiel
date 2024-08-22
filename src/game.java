@@ -1,3 +1,6 @@
+/*
+* @Dependencies
+* */
 package playerScorePackage;
 
 import Player.PlayerScore;
@@ -13,6 +16,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class game {
 
+    /**
+    * var usable in whole scope
+    */
     static List<PlayerScore> playersScore = new ArrayList<>();
     static int currentRound = 0;
     static int maxRounds = 10;
@@ -24,10 +30,18 @@ public class game {
     static JLabel tries = new JLabel("Deine Versuche: " + count, SwingConstants.CENTER);
     static JLabel currentPlayerLabel = new JLabel("Aktueller Spieler: ", SwingConstants.CENTER);
 
+    /**
+    * returns StartPage of the Game
+    */
     public static void main(String[] args) {
         openStartPage();
     }
 
+    /**
+     *  Logik for GamePage
+     *  creates Frame and Layouts
+     *  has functional button and Labels
+     */
     public static void openStartPage() {
         JFrame frame = new JFrame("Wer falsch liegt, trinkt!");
         frame.setSize(800, 800);
@@ -76,7 +90,7 @@ public class game {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         centerPanel.add(buttonPanel, gbc);
 
-        // Event-Listener für Start-Button
+        // @var startButton by actioning to GamePage
         startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -86,7 +100,7 @@ public class game {
             }
         });
 
-        // Event-Listener für Score-Button
+        // @var ScoreButton by actioning to Scorelist
         scoreButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -100,6 +114,11 @@ public class game {
     }
 
 
+    /**
+     *  Logik for GamePage
+     *  creates Frame and Layouts
+     *  has functional button and Labels
+     */
     public static void openGamePage(int numberOfPlayers) {
         JFrame frame = new JFrame("Rate die Zahl richtig oder trink einen Schluck!");
         frame.setSize(800, 800);
@@ -109,7 +128,7 @@ public class game {
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayout(3, 3));
 
-        JButton[] buttons = new JButton[9];
+        JButton [] buttons = new JButton[9];
         for (int i = 0; i < 9; i++) {
             final int buttonNumber = i + 1;
             buttons[i] = new JButton(String.valueOf(buttonNumber));
@@ -160,6 +179,10 @@ public class game {
         updateCurrentPlayerLabel();
     }
 
+    /**
+     * Initialisze Playes to the Game
+     *
+     */
     public static void initializePlayers(int numberOfPlayers) {
         playersScore.clear();
         totalPlayers = numberOfPlayers;
@@ -176,6 +199,9 @@ public class game {
         myNumber = ThreadLocalRandom.current().nextInt(1, 10);
     }
 
+    /**
+     * Logic off guessing number by checking if button is clicked
+     */
     public static void guess(int number, JButton[] buttons, JLabel text, JLabel tries, JFrame frame) {
         if (buttons == null) {
             System.err.println("Buttons array is null.");
@@ -214,6 +240,9 @@ public class game {
         }
     }
 
+    /**
+     * When Player guessed correct, 1 Point gets added
+     */
     private static void handleCorrectGuess(JFrame frame) {
         PlayerScore currentPlayer = playersScore.get(currentPlayerIndex);
         currentPlayer.addPoints(1);
@@ -221,6 +250,10 @@ public class game {
         resetRound();
     }
 
+    /**
+     * reset game after finishing all rounds
+     * announceWinner function gets called
+     */
     private static void resetRound() {
         currentRound++;
         if (currentRound >= maxRounds) {
@@ -234,6 +267,10 @@ public class game {
         }
     }
 
+    /**
+     * First checks if player exists
+     * If Winner is not NULL shows Winner of the Game
+     */
     private static void announceWinner() {
         if (playersScore.isEmpty()) {
             JOptionPane.showMessageDialog(null, "Keine Spieler vorhanden. Es kann kein Gewinner ermittelt werden.");
@@ -247,7 +284,6 @@ public class game {
         if (winner != null) {
             JOptionPane.showMessageDialog(null, "Herzlichen Glückwunsch " + winner.getName() + ", du hast gewonnen!");
 
-            // Zeige die Punkte aller Spieler an
             StringBuilder scoreList = new StringBuilder("Endstand:\n");
             for (PlayerScore player : playersScore) {
                 scoreList.append(player.getName()).append(": ").append(player.getPoints()).append(" Punkte\n");
@@ -258,13 +294,18 @@ public class game {
         }
     }
 
-
+    /**
+     * updates Player Name Label for each try
+     */
     private static void updateCurrentPlayerLabel() {
         PlayerScore currentPlayer = playersScore.get(currentPlayerIndex);
         currentPlayerLabel.setText("Aktueller Spieler: " + currentPlayer.getName());
     }
 
-
+    /**
+     * switch Player after each try
+     * calls updateCurrentPlayerLabel to set te correct Player name
+     */
     private static void switchPlayer() {
         currentPlayerIndex = (currentPlayerIndex + 1) % totalPlayers;
         updateCurrentPlayerLabel();

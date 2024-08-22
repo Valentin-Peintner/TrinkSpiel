@@ -11,7 +11,11 @@ import Player.Scorable;
 public class GameUtils {
     static Integer myNumber = ThreadLocalRandom.current().nextInt(1, 9 + 1);
 
-    public static void openScorePage(JFrame frame, List<PlayerScore> playerScore) {
+    public static void openScorePage(JFrame frame, List<PlayerScore> playerScores) {
+        // Sort player scores in descending order by points
+        playerScores.sort((p1, p2) -> Integer.compare(p2.getPoints(), p1.getPoints()));
+
+        // Create the score display frame
         JFrame scoreFrame = new JFrame("Score-Seite");
         scoreFrame.setSize(400, 200);
         scoreFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -20,8 +24,10 @@ public class GameUtils {
         JTextArea scoreArea = new JTextArea();
         scoreArea.setEditable(false);
         scoreArea.setText("Endstand:\n");
-        for (PlayerScore player : playerScore) {
-            scoreArea.append(player.toString() + "\n");
+
+        // Append sorted scores to the text area
+        for (PlayerScore player : playerScores) {
+            scoreArea.append(player.getName() + ": " + player.getPoints() + " Punkte\n");
         }
 
         JScrollPane scrollPane = new JScrollPane(scoreArea);
@@ -29,8 +35,9 @@ public class GameUtils {
         scoreFrame.setLocationRelativeTo(null);
         scoreFrame.setVisible(true);
 
+        // Create the score message for the dialog
         StringBuilder scoreMessage = new StringBuilder("Punkteübersicht:\n");
-        for (PlayerScore player : playerScore) {
+        for (PlayerScore player : playerScores) {
             scoreMessage.append(player.getName()).append(": ").append(player.getPoints()).append(" Punkte\n");
         }
         JOptionPane.showMessageDialog(frame, scoreMessage.toString(), "Punkte", JOptionPane.INFORMATION_MESSAGE);
